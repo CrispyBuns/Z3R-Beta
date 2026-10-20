@@ -6,10 +6,10 @@ PYTHON:=/usr/bin/env python3
 CC?=cc
 SDL2_CONFIG?=sdl2-config
 CLANG_NONPROTOTYPE_FLAG:=$(shell $(CC) -Wdeprecated-non-prototype -E -x c /dev/null >/dev/null 2>&1 && echo -Wno-error=deprecated-non-prototype)
-CFLAGS:=$(if $(CFLAGS),$(CFLAGS),-O2 -Werror $(CLANG_NONPROTOTYPE_FLAG)) -I .
+CFLAGS:=$(if $(CFLAGS),$(CFLAGS),-O2 $(CLANG_NONPROTOTYPE_FLAG)) -I .
 CFLAGS:=${CFLAGS} $(shell $(SDL2_CONFIG) --cflags) -DSYSTEM_VOLUME_MIXER_AVAILABLE=0
 
-RG35XXXH_CFLAGS?=-O3 -mcpu=cortex-a53 -mtune=cortex-a53 -Werror -Wno-error=format-truncation
+RG35XXXH_CFLAGS?=-O3 -mcpu=cortex-a53 -mtune=cortex-a53
 
 ifeq (${OS},Windows_NT)
     WINDRES:=windres
