@@ -4,21 +4,29 @@ SRCS:=$(wildcard src/*.c snes/*.c) third_party/gl_core/gl_core_3_1.c third_party
 OBJS:=$(SRCS:%.c=%.o)
 PYTHON:=/usr/bin/env python3
 CC?=cc
+SDL2_CONFIG?=sdl2-config
 CLANG_NONPROTOTYPE_FLAG:=$(shell $(CC) -Wdeprecated-non-prototype -E -x c /dev/null >/dev/null 2>&1 && echo -Wno-error=deprecated-non-prototype)
 CFLAGS:=$(if $(CFLAGS),$(CFLAGS),-O2 -Werror $(CLANG_NONPROTOTYPE_FLAG)) -I .
-CFLAGS:=${CFLAGS} $(shell sdl2-config --cflags) -DSYSTEM_VOLUME_MIXER_AVAILABLE=0
+CFLAGS:=${CFLAGS} $(shell $(SDL2_CONFIG) --cflags) -DSYSTEM_VOLUME_MIXER_AVAILABLE=0
+
+RG35XXXH_CFLAGS?=-O3 -mcpu=cortex-a53 -mtune=cortex-a53 -Werror -Wno-error=format-truncation
 
 ifeq (${OS},Windows_NT)
     WINDRES:=windres
     RES:=zelda3.res
-    SDLFLAGS:=-Wl,-Bstatic $(shell sdl2-config --static-libs)
+    SDLFLAGS:=-Wl,-Bstatic $(shell $(SDL2_CONFIG) --static-libs)
 else
-    SDLFLAGS:=$(shell sdl2-config --libs) -lm
+    SDLFLAGS:=$(shell $(SDL2_CONFIG) --libs) -lm
 endif
 
-.PHONY: all clean clean_obj clean_gen
+.PHONY: all clean clean_obj clean_gen rg35xxx-h
 
 all: $(TARGET_EXEC) zelda3_assets.dat
+
+# Build only the RG35XXX-H executable. Generate zelda3_assets.dat on the PC.
+rg35xxx-h: CFLAGS += $(RG35XXXH_CFLAGS)
+rg35xxx-h: $(TARGET_EXEC)
+
 $(TARGET_EXEC): $(OBJS) $(RES)
 	$(CC) $^ -o $@ $(LDFLAGS) $(SDLFLAGS)
 %.o : %.c
