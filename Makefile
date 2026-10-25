@@ -7,7 +7,7 @@ CC?=cc
 SDL2_CONFIG?=sdl2-config
 CLANG_NONPROTOTYPE_FLAG:=$(shell $(CC) -Wdeprecated-non-prototype -E -x c /dev/null >/dev/null 2>&1 && echo -Wno-error=deprecated-non-prototype)
 CFLAGS:=$(if $(CFLAGS),$(CFLAGS),-O2 $(CLANG_NONPROTOTYPE_FLAG)) -I .
-CFLAGS:=${CFLAGS} $(shell $(SDL2_CONFIG) --cflags) -DSYSTEM_VOLUME_MIXER_AVAILABLE=0
+CFLAGS:=$(CFLAGS) $(shell $(SDL2_CONFIG) --cflags) -DSYSTEM_VOLUME_MIXER_AVAILABLE=0
 
 # RG35XX-H / Cortex-A53 performance profile.  This is intentionally kept
 # separate from the generic default so desktop builds retain their normal
@@ -31,6 +31,10 @@ all: $(TARGET_EXEC) zelda3_assets.dat
 rg35xxx-h: CFLAGS += $(RG35XXXH_CFLAGS)
 rg35xxx-h: LDFLAGS += $(RG35XXXH_LDFLAGS)
 rg35xxx-h: $(TARGET_EXEC)
+
+# Opus deliberately rejects __FAST_MATH__ unless FLOAT_APPROX is enabled.
+# Keep fast-math for Z3R, but override it for Opus to retain its NaN/Inf checks.
+third_party/opus-1.3.1-stripped/opus_decoder_amalgam.o: CFLAGS += -fno-fast-math
 
 $(TARGET_EXEC): $(OBJS) $(RES)
 	$(CC) $^ -o $@ $(LDFLAGS) $(SDLFLAGS)
