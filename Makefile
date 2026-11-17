@@ -12,8 +12,8 @@ override CFLAGS += -I . $(shell $(SDL2_CONFIG) --cflags) -DSYSTEM_VOLUME_MIXER_A
 # RG35XX-H / Cortex-A53 performance profile.  This is intentionally kept
 # separate from the generic default so desktop builds retain their normal
 # compiler tuning. LTO is also enabled at link time below.
-RG35XXXH_CFLAGS?=-O3 -mcpu=cortex-a53 -mtune=cortex-a53 -ffast-math -flto=auto
-RG35XXXH_LDFLAGS?=-flto=auto
+A53_CFLAGS?=-O3 -mcpu=cortex-a53 -ffast-math -flto=auto
+A53_LDFLAGS?=-flto=auto
 
 ifeq (${OS},Windows_NT)
     WINDRES:=windres
@@ -23,14 +23,14 @@ else
     SDLFLAGS:=$(shell $(SDL2_CONFIG) --libs) -lm
 endif
 
-.PHONY: all clean clean_obj clean_gen rg35xxx-h
+.PHONY: all clean clean_obj clean_gen a53
 
 all: $(TARGET_EXEC) zelda3_assets.dat
 
-# Build only the RG35XXX-H executable. Generate zelda3_assets.dat on the PC.
-rg35xxx-h: CFLAGS += $(RG35XXXH_CFLAGS)
-rg35xxx-h: LDFLAGS += $(RG35XXXH_LDFLAGS)
-rg35xxx-h: $(TARGET_EXEC)
+# Build only the A53-optimized executable. Generate zelda3_assets.dat on the PC.
+a53: CFLAGS += $(A53_CFLAGS)
+a53: LDFLAGS += $(A53_LDFLAGS)
+a53: $(TARGET_EXEC)
 
 # Opus deliberately rejects __FAST_MATH__ unless FLOAT_APPROX is enabled.
 # Keep fast-math for Z3R, but override it for Opus to retain its NaN/Inf checks.
