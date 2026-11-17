@@ -9,11 +9,11 @@ CLANG_NONPROTOTYPE_FLAG:=$(shell $(CC) -Wdeprecated-non-prototype -E -x c /dev/n
 CFLAGS:=$(if $(CFLAGS),$(CFLAGS),-O2 $(CLANG_NONPROTOTYPE_FLAG)) -I .
 override CFLAGS += -I . $(shell $(SDL2_CONFIG) --cflags) -DSYSTEM_VOLUME_MIXER_AVAILABLE=0
 
-# RG35XX-H / Cortex-A53 performance profile.  This is intentionally kept
-# separate from the generic default so desktop builds retain their normal
-# compiler tuning. LTO is also enabled at link time below.
-A53_CFLAGS?=-O3 -mcpu=cortex-a53 -ffast-math -flto=auto
-A53_LDFLAGS?=-flto=auto
+# Cortex-A53 performance profile. Kept separate from the generic defaults
+# so desktop builds retain their normal compiler tuning.
+# -mcpu selects the A53 instruction set and tuning; LTO is enabled at link time.
+A53_CFLAGS?=-O3 -DARM -mcpu=cortex-a53 -ffast-math -flto -fomit-frame-pointer
+A53_LDFLAGS?=-flto
 
 ifeq (${OS},Windows_NT)
     WINDRES:=windres
